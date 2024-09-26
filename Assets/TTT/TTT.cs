@@ -18,6 +18,10 @@ public class TTT : MonoBehaviour
     PlayerOption currentPlayer = PlayerOption.X;
     Cell[,] cells;
 
+    public bool cornerTaken = false;
+    public int takenCornerX;
+    public int takenCornerY;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -37,7 +41,383 @@ public class TTT : MonoBehaviour
 
     public void MakeOptimalMove()
     {
+        //Winning
+        //rows
+        int playerScore = 0;
+        for(int i = 0;i < Rows; i++)
+        {
+            for (int j = 0;j < Columns; j++)
+            {
+                if (cells[j, i].current == currentPlayer)
+                {
+                    playerScore++;
+                    if (playerScore >= 2)
+                    {
+                        if (j == Columns-1)
+                        {
+                            if (cells[0, i].current == PlayerOption.NONE)
+                            {
+                                ChooseSpace(0, i);
+                                return;
+                            }
+                            else if (cells[1,i].current == PlayerOption.NONE)
+                            {
+                                ChooseSpace(1, i);
+                                return;
+                            }
+                        }
+                        else if(cells[j+1,i].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(j + 1, i);
+                            return;
+                        }
+                    }
+                }
+            }
+            playerScore = 0;
+        }
+        //columbs
+        playerScore = 0;
+        for (int j = 0; j < Columns; j++)
+        {
+            for (int i = 0; i < Rows; i++)
+            {
+                if (cells[j, i].current == currentPlayer)
+                {
+                    playerScore++;
+                    if (playerScore >= 2)
+                    {
+                        if (i == Rows - 1)
+                        {
+                            if (cells[j,0].current == PlayerOption.NONE)
+                            {
+                                ChooseSpace(j,0);
+                                return;
+                            }
+                            else if (cells[j,1].current == PlayerOption.NONE)
+                            {
+                                ChooseSpace(j,1);
+                                return;
+                            }
+                        }
+                        else if (cells[j, i + 1].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(j, i + 1);
+                            return;
+                        }
+                    }
+                }
+            }
+            playerScore = 0;
+        }
+        //Diagonal
+        //left->right
+        playerScore = 0;
+        for(int i = 0; i < Rows; i++)
+        {
+            if (cells[i,i].current == currentPlayer)
+            {
+                playerScore++;
+                if(playerScore >= 2)
+                {
+                    if(i == Rows - 1)
+                    {
+                        if (cells[0,0].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(0,0);
+                            return;
+                        }
+                        else if (cells[1,1].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(1, 1);
+                            return;
+                        }
+                    }
+                    else if (cells[i + 1, i + 1].current == PlayerOption.NONE)
+                    {
+                        ChooseSpace(i+1, i + 1);
+                        return;
+                    }
+                }
+            }
+        }
+        //right->left
+        playerScore = 0;
+        for (int i = 0; i < Rows; i++)
+        {
+            if (cells[Columns - 1 - i, i].current == currentPlayer)
+            {
+                playerScore++;
+                if (playerScore >= 2)
+                {
+                    if (i == Rows - 1)
+                    {
+                        if (cells[2, 0].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(2, 0);
+                            return;
+                        }
+                        if (cells[1, 1].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(1, 1);
+                            return;
+                        }
+                    }
+                    else if (cells[Columns - 1 - (i+1),i+1].current == PlayerOption.NONE)
+                    {
+                        ChooseSpace(Columns - 1 - (i+1), i+1);
+                        return ;
+                    }
+                }
+            }
+        }
 
+        //Blocking
+        //rows
+        playerScore = 0;
+        for (int i = 0; i < Rows; i++)
+        {
+            for (int j = 0; j < Columns; j++)
+            {
+                if (cells[j, i].current != currentPlayer && cells[j,i].current != PlayerOption.NONE)
+                {
+                    playerScore++;
+                    if (playerScore >= 2)
+                    {
+                        if (j == Columns - 1)
+                        {
+                            if (cells[0, i].current == PlayerOption.NONE)
+                            {
+                                ChooseSpace(0, i);
+                                return;
+                            }
+                            else if (cells[1, i].current == PlayerOption.NONE)
+                            {
+                                ChooseSpace(1, i);
+                                return;
+                            }
+                        }
+                        else if (cells[j + 1, i].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(j + 1, i);
+                            return ;
+                        }
+                    }
+                }
+            }
+            playerScore = 0;
+        }
+        //columbs
+        playerScore = 0;
+        for (int j = 0; j < Columns; j++)
+        {
+            for (int i = 0; i < Rows; i++)
+            {
+                if (cells[j, i].current != currentPlayer && cells[j,i].current != PlayerOption.NONE)
+                {
+                    playerScore++;
+                    if (playerScore >= 2)
+                    {
+                        if (i == Rows - 1)
+                        {
+                            if (cells[j, 0].current == PlayerOption.NONE)
+                            {
+                                ChooseSpace(j, 0);
+                                return;
+                            }
+                            else if (cells[j, 1].current == PlayerOption.NONE)
+                            {
+                                ChooseSpace(j, 1);
+                                return;
+                            }
+                        }
+                        else if (cells[j, i + 1].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(j, i + 1);
+                            return;
+                        }
+                    }
+                }
+            }
+            playerScore = 0;
+        }
+        //diagonal
+        //left->Right
+        playerScore = 0;
+        for (int i = 0; i < Rows; i++)
+        {
+            if (cells[i, i].current != currentPlayer && cells[i,i].current != PlayerOption.NONE)
+            {
+                playerScore++;
+                if (playerScore >= 2)
+                {
+                    if (i == Rows - 1)
+                    {
+                        if (cells[0, 0].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(0, 0);
+                            return ;
+                        }
+                        else if (cells[1, 1].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(1, 1);
+                            return ;
+                        }
+                    }
+                    else if (cells[i + 1, i + 1].current == PlayerOption.NONE)
+                    {
+                        ChooseSpace(i + 1, i + 1);
+                        return ;
+                    }
+                }
+            }
+        }
+        //right->left
+        playerScore = 0;
+        for (int i = 0; i < Rows; i++)
+        {
+            if (cells[Columns - 1 - i, i].current != currentPlayer && cells[Columns -1-i,i].current != PlayerOption.NONE)
+            {
+                playerScore++;
+                if (playerScore >= 2)
+                {
+                    if (i == Rows - 1)
+                    {
+                        if (cells[2, 0].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(2, 0);
+                            return ;
+                        }
+                        if (cells[1, 1].current == PlayerOption.NONE)
+                        {
+                            ChooseSpace(1, 1);
+                            return ;
+                        }
+                    }
+                    else if (cells[Columns - 1 - (i + 1), i + 1].current == PlayerOption.NONE)
+                    {
+                        ChooseSpace(Columns - 1 - (i + 1), i + 1);
+                        return ;
+                    }
+                }
+            }
+        }
+
+        //best move
+        if (cornerTaken == false)
+        {
+            if (cells[0, 0].current != PlayerOption.NONE)//leftTop
+            {
+                takenCornerX = 0;
+                takenCornerY = 0;
+                cornerTaken = true;
+
+            }
+            else if (cells[2, 0].current != PlayerOption.NONE)//rightTop
+            {
+                takenCornerX = 2;
+                takenCornerY = 0;
+                cornerTaken = true;
+            }
+            else if (cells[0, 2].current != PlayerOption.NONE)//botLeft
+            {
+                takenCornerX = 0;
+                takenCornerY = 2;
+                cornerTaken = true;
+            }
+            else if (cells[2, 2].current != PlayerOption.NONE)//botRight
+            {
+                takenCornerX = 2;
+                takenCornerY = 2;
+                cornerTaken = true;
+            }
+            else
+            {
+                ChooseSpace(0, 0);
+                takenCornerX = 0;
+                takenCornerY = 0;
+                cornerTaken = true;
+                return;
+            }
+        }
+        //pick center
+        if (cells[1, 1].current == PlayerOption.NONE)
+        {
+            ChooseSpace(1, 1);
+            return;
+        }
+        //left corner
+        if (takenCornerX == 0)
+        {
+            if (takenCornerY == 0)
+            {
+                if (cells[takenCornerX + 1, takenCornerY].current == PlayerOption.NONE)
+                {
+                    ChooseSpace(takenCornerX + 1, takenCornerY);
+                    return;
+                }
+                else if (cells[takenCornerX, takenCornerY + 1].current == PlayerOption.NONE)
+                {
+                    ChooseSpace(takenCornerX, takenCornerY + 1);
+                    return;
+                }
+            }
+            else if (takenCornerY == 2)
+            {
+                if (cells[takenCornerX + 1, takenCornerY].current == PlayerOption.NONE)
+                {
+                    ChooseSpace(takenCornerX + 1, takenCornerY);
+                    return;
+                }
+                else if (cells[takenCornerX, takenCornerY - 1].current == PlayerOption.NONE)
+                {
+                    ChooseSpace(takenCornerX, takenCornerY - 1);
+                }
+            }
+        }
+        //right corner
+        else if (takenCornerX == 2)
+        {
+            if (takenCornerY == 0)
+            {
+                if (cells[takenCornerX - 1, takenCornerY].current == PlayerOption.NONE)
+                {
+                    ChooseSpace(takenCornerX - 1, takenCornerY);
+                    return;
+                }
+                else if (cells[takenCornerX, takenCornerY + 1].current == PlayerOption.NONE)
+                {
+                    ChooseSpace(takenCornerX, takenCornerY + 1);
+                    return;
+                }
+            }
+            else if (takenCornerY == 2)
+            {
+                if (cells[takenCornerX - 1, takenCornerY].current == PlayerOption.NONE)
+                {
+                    ChooseSpace(takenCornerX - 1, takenCornerY);
+                    return;
+                }
+                else if (cells[takenCornerX, takenCornerY - 1].current == PlayerOption.NONE)
+                {
+                    ChooseSpace(takenCornerX, takenCornerY - 1);
+                    return;
+                }
+            }
+        }
+
+        //last move
+        for (int i = 0; i < Rows; i++)
+        {
+            for (int j = 0; j < Columns; j++)
+            {
+                if (cells[j, i].current == PlayerOption.NONE)
+                {
+                    ChooseSpace(j, i);
+                    return;
+                }
+            }
+        }
     }
 
     public void ChooseSpace(int column, int row)
